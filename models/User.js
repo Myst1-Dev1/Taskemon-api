@@ -17,9 +17,14 @@ const UserSchema = new mongoose.Schema({
       type: String,
       enum: ['task_completed', 'award_redeemed']
     },
+    referenceModel: {
+      type: String,
+      enum: ['Tasks', 'Awards'],
+      required: true
+    },
     referenceId: {
       type: mongoose.Schema.Types.ObjectId,
-      refPath: 'history.actionType'
+      refPath: 'history.referenceModel'
     },
     date: {
       type: Date,

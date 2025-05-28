@@ -55,7 +55,6 @@ const deleteTask = async (req, res) => {
     const { id } = req.params;
 
     const task = await Task.findById(id);
-
     if (!task) {
       return res.status(404).json({ message: 'Tarefa não encontrada!' });
     }
@@ -66,6 +65,11 @@ const deleteTask = async (req, res) => {
 
     if (user) {
       user.tasks = user.tasks.filter(taskId => taskId.toString() !== id);
+
+      user.history = user.history.filter(entry =>
+        !(entry.referenceModel === 'Tasks' && entry.referenceId.toString() === id)
+      );
+
       await user.save();
     }
 

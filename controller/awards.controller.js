@@ -58,30 +58,34 @@ const updateAward = async (req, res) => {
 }
 
 const deleteAward = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const award = await Awards.findById(id);
+  try {
+    const { id } = req.params;
 
-        if (!award) {
-            return res.status(404).json({ message: 'Recompensa não encontrada!' });
-        }
-
-        await Awards.findByIdAndDelete(id);
-
-        const user = await User.findOne({ awards: id });
-
-        if (user) {
-            user.awards = user.awards.filter(awardId => awardId.toString() !== id);
-            await user.save();
-        }
-
-        res.status(200).json({ message: 'Recompensa deletada com sucesso!' });
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({message:"Erro ao deletar a recompensa!"});
+    const award = await Awards.findById(id);
+    if (!award) {
+      return res.status(404).json({ message: 'Recompensa não encontrada!' });
     }
-}
+
+    await Awards.findByIdAndDelete(id);
+
+    const user = await User.findOne({ awards: id });
+
+    if (user) {
+      user.awards = user.awards.filter(awardId => awardId.toString() !== id);
+
+      user.history = user.history.filter(entry =>
+        !(entry.referenceModel === 'Awards' && entry.referenceId.toString() === id)
+      );
+
+      await user.save();
+    }
+
+    res.status(200).json({ message: 'Recompensa deletada com sucesso!' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Erro ao deletar a recompensa!' });
+  }
+};
 
 module.exports = {
     createAward,
